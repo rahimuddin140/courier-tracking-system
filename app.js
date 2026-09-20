@@ -31,15 +31,13 @@ app.use(express.json());
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 3. Ensure Database connection before handling requests (Serverless-friendly)
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (err) {
-    console.error('Database connection middleware error:', err);
-    next(err);
-  }
+// 3. Global template variables (Defined first to guarantee availability across all routes & error pages)
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session ? req.session.user || null : null;
+  res.locals.successMsg = [];
+  res.locals.errorMsg = [];
+  res.locals.currentPath = req.path || '/';
+  next();
 });
 
 // 4. Session configuration with MongoDB Session Store
@@ -72,16 +70,31 @@ app.use(
 // 5. Flash messaging middleware
 app.use(flash());
 
-// 6. Global variables for all views
+// 6. Update locals with session & flash values after session middleware has run
 app.use((req, res, next) => {
   res.locals.currentUser = req.session ? req.session.user || null : null;
   res.locals.successMsg = req.flash('success');
   res.locals.errorMsg = req.flash('error');
-  res.locals.currentPath = req.path;
+  res.locals.currentPath = req.path || '/';
   next();
 });
 
-// 7. Route Handlers
+// 7. Ensure Database connection before handling requests (Serverless-friendly)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database connection middleware error:', err.message);
+    res.locals.errorMsg = [
+      'Database connection failed. Please ensure 0.0.0.0/0 (Allow Access Anywhere) is added to your MongoDB Atlas Network Access whitelist.'
+    ];
+    // Proceed so user-friendly page renders rather than 500 crash
+    next();
+  }
+});
+
+// 8. Route Handlers
 // Public landing page
 app.get('/', (req, res) => {
   res.render('landing', { title: 'FastTrack Logistics - Fast & Reliable Courier Services' });
@@ -94,7 +107,7 @@ app.use('/customer', customerRoutes);
 app.use('/agent', agentRoutes);
 app.use('/admin', adminRoutes);
 
-// 8. 404 Handler
+// 9. 404 Handler
 app.use((req, res) => {
   res.status(404).render('404', {
     title: '404 - Page Not Found',
@@ -102,7 +115,7 @@ app.use((req, res) => {
   });
 });
 
-// 9. Central Error Handler
+// 10. Central Error Handler
 app.use((err, req, res, next) => {
   console.error('Unhandled Application Error:', err);
   res.status(500).render('500', {
@@ -112,7 +125,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 10. Standalone Server Start (when run directly e.g. node app.js)
+// 11. Standalone Server Start (when run directly e.g. node app.js)
 if (require.main === module) {
   connectDB().then(() => {
     const server = app.listen(currentPort, () => {
