@@ -1,8 +1,19 @@
 const mongoose = require('mongoose');
 
 let mongoMemoryServer = null;
+let cachedPromise = null;
 
 const connectDB = async () => {
+  // If connection is already open, reuse it immediately (essential for serverless)
+  if (mongoose.connection.readyState >= 1) {
+    return mongoose;
+  }
+
+  // If a connection attempt is currently in flight, await it
+  if (cachedPromise) {
+    return cachedPromise;
+  }
+
   try {
     let uri = process.env.MONGO_URI ? process.env.MONGO_URI.trim() : '';
 
@@ -20,7 +31,11 @@ const connectDB = async () => {
       }
     }
 
-    const conn = await mongoose.connect(uri);
+    cachedPromise = mongoose.connect(uri, {
+      bufferCommands: false // Disable buffering so errors surface immediately if connection fails
+    });
+
+    const conn = await cachedPromise;
     if (mongoMemoryServer) {
       console.log(`✅ Connected to local MongoDB (Dev/Test mode): ${conn.connection.host}`);
     } else {
@@ -28,8 +43,9 @@ const connectDB = async () => {
     }
     return conn;
   } catch (err) {
+    cachedPromise = null;
     console.error('❌ MongoDB connection failed:', err.message);
-    process.exit(1);
+    throw err;
   }
 };
 

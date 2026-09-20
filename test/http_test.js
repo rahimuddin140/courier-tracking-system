@@ -1,12 +1,12 @@
 const assert = require('assert');
 const http = require('http');
-const { startServer } = require('../app');
+const app = require('../app');
 
 async function runHttpTests() {
   const TEST_PORT = 4050;
   console.log(`🌐 Starting HTTP Integration Route Tests on port ${TEST_PORT}...\n`);
 
-  const server = await startServer(TEST_PORT);
+  const server = app.listen(TEST_PORT);
 
   // Allow server to listen
   await new Promise(r => setTimeout(r, 1000));
