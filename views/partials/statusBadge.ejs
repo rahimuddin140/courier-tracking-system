@@ -1,0 +1,30 @@
+<% 
+  let badgeClass = 'bg-secondary';
+  let badgeIcon = 'bi-clock';
+
+  if (status === 'Booked') {
+    badgeClass = 'bg-secondary text-white';
+    badgeIcon = 'bi-bookmark-check';
+  } else if (status === 'Picked Up') {
+    badgeClass = 'bg-info text-dark';
+    badgeIcon = 'bi-box-seam';
+  } else if (status === 'In Transit') {
+    badgeClass = 'bg-primary text-white';
+    badgeIcon = 'bi-truck';
+  } else if (status === 'Out for Delivery') {
+    badgeClass = 'bg-warning text-dark';
+    badgeIcon = 'bi-bicycle';
+  } else if (status === 'Delivered') {
+    badgeClass = 'bg-success text-white';
+    badgeIcon = 'bi-check-circle-fill';
+  } else if (status === 'Failed') {
+    badgeClass = 'bg-danger text-white';
+    badgeIcon = 'bi-x-circle-fill';
+  } else if (status === 'Cancelled') {
+    badgeClass = 'bg-dark text-white';
+    badgeIcon = 'bi-slash-circle';
+  }
+%>
+<span class="badge badge-status <%= badgeClass %>">
+  <i class="bi <%= badgeIcon %> me-1"></i><%= status %>
+</span>

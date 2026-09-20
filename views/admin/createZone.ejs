@@ -1,0 +1,59 @@
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="d-flex align-items-center mb-4">
+        <a href="/admin/zones" class="btn btn-outline-secondary btn-sm me-3">
+          <i class="bi bi-arrow-left"></i> Back to Zones
+        </a>
+        <h2 class="fw-bold mb-0">Create Delivery Zone</h2>
+      </div>
+
+      <div class="card p-4 p-md-5 shadow-sm">
+        <form action="/admin/zones/create" method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Zone Name <span class="text-danger">*</span></label>
+            <input type="text" name="zoneName" class="form-control" placeholder="e.g. South Delhi Hub, East Bengaluru, North Zone" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Covered Pincodes (Comma-Separated)</label>
+            <textarea 
+              name="pincodes" 
+              class="form-control" 
+              rows="3" 
+              placeholder="e.g. 110001, 110002, 110003, 110020"
+            ></textarea>
+            <div class="form-text small">Enter postal codes separated by commas that belong to this operational zone.</div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Base Delivery Fee (₹)</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" step="1" min="0" name="baseFee" class="form-control" value="50" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Rate per kg (₹/kg)</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" step="1" min="0" name="perKgRate" class="form-control" value="20" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-light p-3 rounded mb-4 small text-muted">
+            <i class="bi bi-info-circle me-1 text-primary"></i>
+            <strong>Calculation Rule:</strong>
+            <code>Delivery Charge = Base Fee + (Weight × Rate/kg)</code>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+            <i class="bi bi-check-lg me-1"></i> Save Delivery Zone
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

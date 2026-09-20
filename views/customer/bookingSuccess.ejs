@@ -1,0 +1,53 @@
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card p-4 p-md-5 text-center shadow-lg border-success border-top border-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle mx-auto mb-3" style="width: 70px; height: 70px;">
+          <i class="bi bi-check-lg fs-1"></i>
+        </div>
+
+        <h3 class="fw-bold mb-1">Booking Confirmed!</h3>
+        <p class="text-muted mb-4">Your parcel has been booked and scheduled for agent pickup.</p>
+
+        <!-- Prominent Tracking ID Box -->
+        <div class="bg-light p-4 rounded-4 mb-4 border">
+          <div class="text-uppercase text-muted small fw-bold mb-1">Your Tracking ID</div>
+          <div class="display-6 fw-bold text-primary mb-3 text-break"><%= parcel.trackingId %></div>
+          <button 
+            type="button" 
+            class="btn btn-outline-primary btn-copy-tracking px-4 fw-semibold" 
+            data-tracking-id="<%= parcel.trackingId %>"
+          >
+            <i class="bi bi-clipboard me-1"></i> Copy Tracking ID
+          </button>
+        </div>
+
+        <!-- Summary Details -->
+        <div class="text-start bg-light p-3 rounded-3 mb-4 small">
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span class="text-muted">Recipient:</span>
+            <span class="fw-semibold"><%= parcel.receiverName %> (<%= parcel.receiverPincode %>)</span>
+          </div>
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span class="text-muted">Weight / Type:</span>
+            <span class="fw-semibold"><%= parcel.weight %> kg • <%= parcel.parcelType %></span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Total Delivery Charge:</span>
+            <span class="fw-bold text-success fs-6">₹<%= parcel.deliveryCharge %></span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+          <a href="/track?trackingId=<%= parcel.trackingId %>" class="btn btn-primary fw-semibold px-4">
+            <i class="bi bi-geo-alt me-1"></i> Track This Parcel
+          </a>
+          <a href="/customer/parcels" class="btn btn-outline-secondary fw-semibold">
+            <i class="bi bi-boxes me-1"></i> My Parcels
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

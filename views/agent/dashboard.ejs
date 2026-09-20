@@ -1,0 +1,130 @@
+<div class="container my-4">
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Agent Portal Dashboard</h2>
+      <p class="text-muted mb-0">
+        Logged in as <strong><%= currentUser.name %></strong> 
+        <% if (currentUser.zone) { %>
+          <span class="badge bg-secondary ms-1"><i class="bi bi-geo-alt"></i> <%= currentUser.zone.zoneName || 'Assigned Zone' %></span>
+        <% } %>
+      </p>
+    </div>
+    <a href="/agent/parcels" class="btn btn-primary fw-semibold">
+      <i class="bi bi-list-task me-1"></i> View All Assigned Parcels
+    </a>
+  </div>
+
+  <!-- Agent Stats Grid -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Total Assigned</div>
+            <div class="fs-3 fw-bold"><%= stats.totalAssigned %></div>
+          </div>
+          <div class="text-primary fs-2"><i class="bi bi-box-seam"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card stat-warning p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Pending / Active</div>
+            <div class="fs-3 fw-bold text-warning"><%= stats.pending %></div>
+          </div>
+          <div class="text-warning fs-2"><i class="bi bi-hourglass-split"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card stat-success p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Delivered</div>
+            <div class="fs-3 fw-bold text-success"><%= stats.delivered %></div>
+          </div>
+          <div class="text-success fs-2"><i class="bi bi-check-circle"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card stat-danger p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Failed Deliveries</div>
+            <div class="fs-3 fw-bold text-danger"><%= stats.failed %></div>
+          </div>
+          <div class="text-danger fs-2"><i class="bi bi-x-circle"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Tasks / Parcels Table -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0"><i class="bi bi-clipboard-check me-2 text-primary"></i>Recent Assigned Shipments</h5>
+      <a href="/agent/parcels" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body p-0">
+      <% if (recentParcels && recentParcels.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Tracking ID</th>
+                <th>Recipient & Destination</th>
+                <th>Sender (Pickup)</th>
+                <th>Weight / Type</th>
+                <th>Current Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentParcels.forEach(p => { %>
+                <tr>
+                  <td>
+                    <span class="fw-bold text-primary"><%= p.trackingId %></span>
+                  </td>
+                  <td>
+                    <div class="fw-semibold"><%= p.receiverName %></div>
+                    <div class="small text-muted text-truncate" style="max-width: 200px;"><%= p.receiverAddress %> (PIN: <%= p.receiverPincode %>)</div>
+                    <div class="small"><i class="bi bi-telephone me-1"></i><%= p.receiverPhone %></div>
+                  </td>
+                  <td class="small">
+                    <div><%= p.senderName %></div>
+                    <div class="text-muted"><%= p.senderPhone %></div>
+                  </td>
+                  <td class="small">
+                    <div><%= p.weight %> kg</div>
+                    <span class="text-muted"><%= p.parcelType %></span>
+                  </td>
+                  <td>
+                    <%- include('../partials/statusBadge', { status: p.currentStatus }) %>
+                  </td>
+                  <td>
+                    <a href="/agent/parcel/<%= p._id %>" class="btn btn-sm btn-outline-primary fw-semibold text-nowrap">
+                      <i class="bi bi-arrow-repeat me-1"></i> Update Status
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-check2-circle fs-1 d-block mb-2 text-success"></i>
+          <h5>No parcels currently assigned</h5>
+          <p class="small">New parcels assigned by admin will appear here automatically.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

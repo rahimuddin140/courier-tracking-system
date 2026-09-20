@@ -1,0 +1,207 @@
+<div class="container my-4">
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="bi bi-shield-lock-fill text-primary me-2"></i>Logistics Command Center</h2>
+      <p class="text-muted mb-0">System-wide parcel analytics, agent workload distribution, and zone administration.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/admin/parcels" class="btn btn-primary fw-semibold">
+        <i class="bi bi-box-seam me-1"></i> Manage Parcels
+      </a>
+      <a href="/admin/agents/create" class="btn btn-outline-primary fw-semibold">
+        <i class="bi bi-person-plus me-1"></i> New Agent
+      </a>
+      <a href="/admin/zones/create" class="btn btn-outline-secondary fw-semibold">
+        <i class="bi bi-geo-alt me-1"></i> New Zone
+      </a>
+    </div>
+  </div>
+
+  <!-- Primary Stats Grid -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Total Booked</div>
+            <div class="fs-3 fw-bold"><%= stats.totalParcels %></div>
+            <div class="small text-muted"><%= stats.bookedToday %> today • <%= stats.bookedThisWeek %> this week</div>
+          </div>
+          <div class="text-primary fs-2"><i class="bi bi-boxes"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card stat-warning p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Unassigned / Booked</div>
+            <div class="fs-3 fw-bold text-warning"><%= stats.statusCounts.Booked %></div>
+            <div class="small text-muted">Awaiting agent dispatch</div>
+          </div>
+          <div class="text-warning fs-2"><i class="bi bi-hourglass"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card stat-info p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">In Transit / Out</div>
+            <div class="fs-3 fw-bold text-info"><%= stats.statusCounts['In Transit'] + stats.statusCounts['Out for Delivery'] %></div>
+            <div class="small text-muted"><%= stats.statusCounts['Picked Up'] %> picked up</div>
+          </div>
+          <div class="text-info fs-2"><i class="bi bi-truck"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card stat-success p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Delivered Success</div>
+            <div class="fs-3 fw-bold text-success"><%= stats.statusCounts.Delivered %></div>
+            <div class="small text-danger"><%= stats.statusCounts.Failed %> failed delivery attempts</div>
+          </div>
+          <div class="text-success fs-2"><i class="bi bi-check-circle"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Workload Distribution Table -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="fw-bold mb-0"><i class="bi bi-people-fill text-primary me-2"></i>Agent-wise Workload & Performance</h5>
+        <small class="text-muted">Real-time load balancing across regional delivery hubs</small>
+      </div>
+      <a href="/admin/agents" class="btn btn-sm btn-outline-primary">Manage Agents</a>
+    </div>
+    <div class="card-body p-0">
+      <% if (agentWorkload && agentWorkload.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Agent Name</th>
+                <th>Assigned Zone</th>
+                <th>Status</th>
+                <th>Active Load</th>
+                <th>In Transit</th>
+                <th>Delivered</th>
+                <th>Failed</th>
+                <th>Total Handled</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% agentWorkload.forEach(ag => { %>
+                <tr>
+                  <td>
+                    <div class="fw-bold"><%= ag.name %></div>
+                    <div class="small text-muted"><%= ag.phone %> • <%= ag.email %></div>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border"><%= ag.zoneName %></span>
+                  </td>
+                  <td>
+                    <% if (ag.isActive) { %>
+                      <span class="badge bg-success-subtle text-success">Active</span>
+                    <% } else { %>
+                      <span class="badge bg-danger-subtle text-danger">Inactive</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <span class="badge <%= ag.activeLoad > 5 ? 'bg-warning text-dark' : 'bg-primary' %> fs-6">
+                      <%= ag.activeLoad %>
+                    </span>
+                  </td>
+                  <td class="small fw-semibold"><%= ag.inTransit %></td>
+                  <td class="small text-success fw-bold"><%= ag.delivered %></td>
+                  <td class="small text-danger fw-bold"><%= ag.failed %></td>
+                  <td class="small text-muted"><%= ag.total %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="p-4 text-center text-muted">
+          No delivery agents configured. <a href="/admin/agents/create">Create your first agent</a>.
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Recent Parcels Activity -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Recent System Bookings</h5>
+      <a href="/admin/parcels" class="btn btn-sm btn-outline-primary">View All Parcels</a>
+    </div>
+    <div class="card-body p-0">
+      <% if (recentParcels && recentParcels.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Tracking ID</th>
+                <th>Customer</th>
+                <th>Destination</th>
+                <th>Weight / Type</th>
+                <th>Status</th>
+                <th>Assigned Agent</th>
+                <th>Booked At</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentParcels.forEach(p => { %>
+                <tr>
+                  <td>
+                    <span class="fw-bold text-primary"><%= p.trackingId %></span>
+                  </td>
+                  <td class="small">
+                    <div><%= p.customer ? p.customer.name : p.senderName %></div>
+                    <div class="text-muted"><%= p.senderPhone %></div>
+                  </td>
+                  <td class="small">
+                    <div><%= p.receiverName %></div>
+                    <span class="badge bg-light text-dark border">PIN: <%= p.receiverPincode %></span>
+                  </td>
+                  <td class="small">
+                    <%= p.weight %> kg • <%= p.parcelType %>
+                  </td>
+                  <td>
+                    <%- include('../partials/statusBadge', { status: p.currentStatus }) %>
+                  </td>
+                  <td class="small">
+                    <% if (p.assignedAgent) { %>
+                      <span class="fw-semibold"><%= p.assignedAgent.name %></span>
+                    <% } else { %>
+                      <span class="badge bg-warning text-dark">Unassigned</span>
+                    <% } %>
+                  </td>
+                  <td class="small text-muted text-nowrap">
+                    <%= new Date(p.bookedAt).toLocaleDateString() %>
+                  </td>
+                  <td>
+                    <a href="/track?trackingId=<%= p.trackingId %>" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-search"></i>
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="p-4 text-center text-muted">No parcels booked in the system yet.</div>
+      <% } %>
+    </div>
+  </div>
+</div>

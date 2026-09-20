@@ -1,0 +1,126 @@
+<!-- Hero Section with Public Tracking Form -->
+<section class="hero-gradient text-center mb-5">
+  <div class="container py-4">
+    <div class="badge bg-light text-primary px-3 py-2 rounded-pill fw-semibold mb-3 shadow-sm">
+      <i class="bi bi-shield-check me-1"></i> End-to-End Parcel Lifecycle Tracking
+    </div>
+    <h1 class="display-4 fw-bold mb-3">Fast, Reliable & Transparent Courier Delivery</h1>
+    <p class="lead mb-4 mx-auto opacity-90" style="max-width: 650px;">
+      Book shipments with dynamic delivery charge estimation, assign tasks to agents, and track parcels every step of the journey in real-time.
+    </p>
+
+    <!-- Direct Tracking Form -->
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <form action="/track" method="POST" class="bg-white p-2 rounded-4 shadow-lg d-flex gap-2">
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+              <i class="bi bi-search fs-5"></i>
+            </span>
+            <input 
+              type="text" 
+              name="trackingId" 
+              class="form-control border-0 shadow-none ps-2" 
+              placeholder="Enter Tracking ID (e.g. PKG-20260920-A101)" 
+              required
+            >
+          </div>
+          <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-semibold text-nowrap">
+            Track Now
+          </button>
+        </form>
+        <div class="mt-2 text-white-50 small">
+          Try sample tracking IDs: <code class="text-white">PKG-20260920-A101</code> or <code class="text-white">PKG-20260920-B202</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Feature Columns -->
+<section class="container mb-5">
+  <div class="row g-4">
+    <!-- Customer Card -->
+    <div class="col-md-4">
+      <div class="card h-100 p-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle mb-3" style="width: 54px; height: 54px;">
+          <i class="bi bi-box-seam fs-3"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Customers</h4>
+        <p class="text-muted mb-4">
+          Book parcels with automatic weight and destination zone rates. Track live status, manage active orders, and cancel if unassigned.
+        </p>
+        <div class="mt-auto">
+          <a href="/customer/book" class="btn btn-outline-primary w-100 fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Book a Parcel
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Card -->
+    <div class="col-md-4">
+      <div class="card h-100 p-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-info-subtle text-info rounded-circle mb-3" style="width: 54px; height: 54px;">
+          <i class="bi bi-truck fs-3"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Delivery Agents</h4>
+        <p class="text-muted mb-4">
+          View assigned shipments in your zone. Transition parcels strictly through the lifecycle: Picked Up, In Transit, Out for Delivery, and Delivered.
+        </p>
+        <div class="mt-auto">
+          <a href="/agent/dashboard" class="btn btn-outline-info w-100 fw-semibold">
+            <i class="bi bi-speedometer2 me-1"></i> Agent Portal
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Card -->
+    <div class="col-md-4">
+      <div class="card h-100 p-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-dark-subtle text-dark rounded-circle mb-3" style="width: 54px; height: 54px;">
+          <i class="bi bi-shield-lock fs-3"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Logistics Admins</h4>
+        <p class="text-muted mb-4">
+          Centralized command center. Real-time workload balancing, assign unassigned packages to zone agents, configure pincode pricing, and view analytics.
+        </p>
+        <div class="mt-auto">
+          <a href="/admin/dashboard" class="btn btn-outline-dark w-100 fw-semibold">
+            <i class="bi bi-graph-up me-1"></i> Admin Console
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- System Architecture & Lifecycle Highlights -->
+<section class="container mb-5">
+  <div class="card bg-light border-0 p-4 p-md-5">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-7">
+        <span class="badge bg-primary mb-2">Auditability & Tracking</span>
+        <h3 class="fw-bold mb-3">Complete Status History Log with Timestamp</h3>
+        <p class="text-muted">
+          Every parcel movement is recorded with precise timestamps and identity tracking. Neither customer nor agent can tamper with historical logs, ensuring reliable audit trails for college evaluation and enterprise operations.
+        </p>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Enforced state machine:</strong> Booked → Picked Up → In Transit → Out for Delivery → Delivered</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>MongoDB Atlas:</strong> Cloud-hosted cluster with session persistence</li>
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Dynamic rate engine:</strong> Calculates price automatically based on weight and zone pincodes</li>
+        </ul>
+      </div>
+      <div class="col-lg-5 text-center">
+        <div class="p-4 bg-white rounded-3 shadow-sm text-start">
+          <h6 class="text-uppercase text-muted fw-bold small mb-3">Default Credentials (from Seed)</h6>
+          <div class="small mb-2"><strong>Admin:</strong> admin@courier.com / admin123</div>
+          <div class="small mb-2"><strong>Agent:</strong> rajesh@courier.com / agent123</div>
+          <div class="small mb-3"><strong>Customer:</strong> customer@courier.com / customer123</div>
+          <a href="/login" class="btn btn-primary btn-sm w-100 fw-semibold">Go to Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

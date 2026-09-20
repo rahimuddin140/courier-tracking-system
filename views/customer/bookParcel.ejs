@@ -1,0 +1,138 @@
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="d-flex align-items-center mb-4">
+        <a href="/customer/dashboard" class="btn btn-outline-secondary btn-sm me-3">
+          <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <h2 class="fw-bold mb-0">Book a New Parcel</h2>
+      </div>
+
+      <form action="/customer/book" method="POST" id="bookingForm">
+        <div class="row g-4">
+          <!-- Left Column: Addresses and Parcel Details -->
+          <div class="col-lg-8">
+            <!-- Sender Information Card -->
+            <div class="card mb-4">
+              <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-person-fill-up me-2"></i>Sender Details (Pickup)</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Sender Name <span class="text-danger">*</span></label>
+                    <input type="text" name="senderName" class="form-control" value="<%= user ? user.name : '' %>" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Sender Phone <span class="text-danger">*</span></label>
+                    <input type="text" name="senderPhone" class="form-control" value="<%= user ? user.phone : '' %>" required>
+                  </div>
+                  <div class="col-md-8">
+                    <label class="form-label fw-semibold">Pickup Address <span class="text-danger">*</span></label>
+                    <textarea name="senderAddress" class="form-control" rows="2" placeholder="House/Flat No, Street, Landmark, City" required></textarea>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Sender Pincode <span class="text-danger">*</span></label>
+                    <input type="text" name="senderPincode" class="form-control" placeholder="e.g. 560001" required>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Receiver Information Card -->
+            <div class="card mb-4">
+              <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-success"><i class="bi bi-person-fill-down me-2"></i>Receiver Details (Delivery)</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Receiver Name <span class="text-danger">*</span></label>
+                    <input type="text" name="receiverName" class="form-control" placeholder="Recipient's full name" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Receiver Phone <span class="text-danger">*</span></label>
+                    <input type="text" name="receiverPhone" class="form-control" placeholder="Recipient's phone" required>
+                  </div>
+                  <div class="col-md-8">
+                    <label class="form-label fw-semibold">Delivery Address <span class="text-danger">*</span></label>
+                    <textarea name="receiverAddress" class="form-control" rows="2" placeholder="House/Flat No, Street, Landmark, City" required></textarea>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Destination Pincode <span class="text-danger">*</span></label>
+                    <input type="text" name="receiverPincode" id="receiverPincode" class="form-control" placeholder="e.g. 110001" required>
+                    <div class="form-text small">Determines zone & delivery rate</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Parcel Specs Card -->
+            <div class="card mb-4">
+              <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2"></i>Parcel Specifications</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Weight (in kg) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.1" min="0.1" name="weight" id="weight" class="form-control" placeholder="e.g. 2.5" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Parcel Type</label>
+                    <select name="parcelType" class="form-select">
+                      <option value="Document">Document</option>
+                      <option value="Small Box" selected>Small Box</option>
+                      <option value="Medium Box">Medium Box</option>
+                      <option value="Large Box">Large Box</option>
+                      <option value="Fragile">Fragile (Handle With Care)</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-semibold">Package Description / Handling Notes</label>
+                    <input type="text" name="description" class="form-control" placeholder="e.g. Office laptop, Books, Ceramic mugs">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Live Rate Card & Confirmation -->
+          <div class="col-lg-4">
+            <div class="card p-3 sticky-top" style="top: 80px;">
+              <h5 class="fw-bold mb-3"><i class="bi bi-calculator me-2 text-primary"></i>Delivery Estimate</h5>
+              <p class="text-muted small">
+                Calculated automatically using destination pincode zone base fee and parcel weight.
+              </p>
+
+              <!-- Dynamic Estimate Container -->
+              <div id="estimateDisplay" class="d-none bg-primary-subtle p-3 rounded-3 mb-3 border border-primary-subtle">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Matched Zone:</div>
+                <div id="estimateZone" class="fw-bold text-primary mb-2">Zone Name</div>
+
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Estimated Charge:</div>
+                <div id="estimateCharge" class="display-6 fw-bold text-success mb-1">₹0</div>
+
+                <div id="estimateFormula" class="small text-muted border-top border-secondary-subtle pt-2 mt-2">
+                  Formula details
+                </div>
+              </div>
+
+              <div class="bg-light p-3 rounded-3 mb-3 small text-muted">
+                <i class="bi bi-info-circle me-1 text-primary"></i>
+                <strong>Pricing Formula:</strong>
+                <div>Zone Base Fee + (Weight × Rate/kg)</div>
+                <div class="mt-1">Standard National rate applies if pincode is outside defined hubs.</div>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">
+                <i class="bi bi-check-lg me-1"></i> Confirm & Book Parcel
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

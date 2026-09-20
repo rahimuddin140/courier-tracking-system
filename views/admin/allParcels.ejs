@@ -1,0 +1,196 @@
+<div class="container my-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Parcel Management</h2>
+      <p class="text-muted mb-0">Search, filter, monitor lifecycle progress, and assign packages to delivery agents.</p>
+    </div>
+  </div>
+
+  <!-- Filters Card -->
+  <div class="card mb-4 p-3 shadow-sm">
+    <form action="/admin/parcels" method="GET" class="row g-3 align-items-end">
+      <!-- Search -->
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-muted">Search Text</label>
+        <input 
+          type="text" 
+          name="search" 
+          class="form-control form-control-sm" 
+          placeholder="Tracking ID, Name, PIN..." 
+          value="<%= filters.search %>"
+        >
+      </div>
+
+      <!-- Status Filter -->
+      <div class="col-md-2">
+        <label class="form-label small fw-bold text-muted">Status</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+          <option value="Booked" <%= filters.status === 'Booked' ? 'selected' : '' %>>Booked</option>
+          <option value="Picked Up" <%= filters.status === 'Picked Up' ? 'selected' : '' %>>Picked Up</option>
+          <option value="In Transit" <%= filters.status === 'In Transit' ? 'selected' : '' %>>In Transit</option>
+          <option value="Out for Delivery" <%= filters.status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
+          <option value="Delivered" <%= filters.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+          <option value="Failed" <%= filters.status === 'Failed' ? 'selected' : '' %>>Failed</option>
+          <option value="Cancelled" <%= filters.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+        </select>
+      </div>
+
+      <!-- Agent Filter -->
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-muted">Assigned Agent</label>
+        <select name="agentId" class="form-select form-select-sm">
+          <option value="all" <%= filters.agentId === 'all' ? 'selected' : '' %>>All Agents</option>
+          <option value="unassigned" <%= filters.agentId === 'unassigned' ? 'selected' : '' %>>-- Unassigned Only --</option>
+          <% agents.forEach(ag => { %>
+            <option value="<%= ag._id %>" <%= filters.agentId === ag._id.toString() ? 'selected' : '' %>><%= ag.name %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Date Range -->
+      <div class="col-md-2">
+        <label class="form-label small fw-bold text-muted">From Date</label>
+        <input type="date" name="dateFrom" class="form-control form-control-sm" value="<%= filters.dateFrom %>">
+      </div>
+
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm flex-grow-1 fw-semibold">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+        <a href="/admin/parcels" class="btn btn-outline-secondary btn-sm" title="Reset Filters">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Parcels Table -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <% if (parcels && parcels.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Tracking ID</th>
+                <th>Sender (Origin)</th>
+                <th>Receiver (Drop)</th>
+                <th>Weight & Rate</th>
+                <th>Status</th>
+                <th>Assigned Agent</th>
+                <th>Booked At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% parcels.forEach(p => { %>
+                <tr>
+                  <td>
+                    <div class="fw-bold text-primary"><%= p.trackingId %></div>
+                    <button class="btn btn-sm btn-link p-0 text-muted btn-copy-tracking small" data-tracking-id="<%= p.trackingId %>">
+                      <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                  </td>
+                  <td class="small">
+                    <div class="fw-semibold"><%= p.senderName %></div>
+                    <div class="text-muted"><%= p.senderPhone %></div>
+                    <span class="badge bg-light text-dark border">PIN: <%= p.senderPincode %></span>
+                  </td>
+                  <td class="small">
+                    <div class="fw-semibold"><%= p.receiverName %></div>
+                    <div class="text-muted"><%= p.receiverPhone %></div>
+                    <span class="badge bg-light text-dark border">PIN: <%= p.receiverPincode %></span>
+                  </td>
+                  <td class="small">
+                    <div><%= p.weight %> kg • <%= p.parcelType %></div>
+                    <div class="fw-bold text-success">₹<%= p.deliveryCharge %></div>
+                  </td>
+                  <td>
+                    <%- include('../partials/statusBadge', { status: p.currentStatus }) %>
+                  </td>
+                  <td class="small">
+                    <% if (p.assignedAgent) { %>
+                      <div class="fw-semibold text-dark"><%= p.assignedAgent.name %></div>
+                      <div class="text-muted"><%= p.assignedAgent.phone %></div>
+                    <% } else { %>
+                      <span class="badge bg-warning text-dark">Unassigned</span>
+                    <% } %>
+                  </td>
+                  <td class="small text-muted text-nowrap">
+                    <%= new Date(p.bookedAt).toLocaleDateString() %>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="/track?trackingId=<%= p.trackingId %>" class="btn btn-sm btn-outline-secondary" title="View Public Tracking">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <!-- Trigger Assign Modal -->
+                      <button 
+                        type="button" 
+                        class="btn btn-sm <%= p.assignedAgent ? 'btn-outline-primary' : 'btn-primary' %>" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#assignModal<%= p._id %>"
+                        title="Assign / Reassign Agent"
+                      >
+                        <i class="bi bi-person-check"></i> <%= p.assignedAgent ? 'Reassign' : 'Assign' %>
+                      </button>
+                    </div>
+
+                    <!-- Assign Agent Modal for this parcel -->
+                    <div class="modal fade" id="assignModal<%= p._id %>" tabindex="-1" aria-labelledby="assignModalLabel<%= p._id %>" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <form action="/admin/parcel/<%= p._id %>/assign" method="POST">
+                            <div class="modal-header">
+                              <h5 class="modal-title fw-bold" id="assignModalLabel<%= p._id %>">
+                                Assign Agent to Parcel <%= p.trackingId %>
+                              </h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-start">
+                              <div class="p-3 bg-light rounded mb-3 small">
+                                <div><strong>Destination:</strong> <%= p.receiverAddress %> (PIN: <%= p.receiverPincode %>)</div>
+                                <div><strong>Package:</strong> <%= p.weight %> kg • <%= p.parcelType %></div>
+                                <div><strong>Current Status:</strong> <%= p.currentStatus %></div>
+                              </div>
+
+                              <div class="mb-3">
+                                <label class="form-label fw-semibold">Select Delivery Agent <span class="text-danger">*</span></label>
+                                <select name="agentId" class="form-select" required>
+                                  <option value="">-- Choose an Agent --</option>
+                                  <% agents.forEach(ag => { %>
+                                    <option 
+                                      value="<%= ag._id %>" 
+                                      <%= p.assignedAgent && p.assignedAgent._id.toString() === ag._id.toString() ? 'selected' : '' %>
+                                    >
+                                      <%= ag.name %>
+                                    </option>
+                                  <% }) %>
+                                </select>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                              <button type="submit" class="btn btn-primary fw-semibold">Confirm Assignment</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+          <h5>No parcels match the selected filters</h5>
+          <p class="small">Try clearing search or filters to see all shipments.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

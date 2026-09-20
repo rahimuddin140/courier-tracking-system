@@ -1,0 +1,141 @@
+<div class="container my-4">
+  <!-- Header & Welcome -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Customer Dashboard</h2>
+      <p class="text-muted mb-0">Welcome back, <strong><%= currentUser.name %></strong>! Manage your bookings and monitor parcel statuses.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/customer/book" class="btn btn-primary fw-semibold">
+        <i class="bi bi-plus-circle me-1"></i> Book a Parcel
+      </a>
+      <a href="/customer/parcels" class="btn btn-outline-secondary fw-semibold">
+        <i class="bi bi-boxes me-1"></i> View All Parcels
+      </a>
+    </div>
+  </div>
+
+  <!-- Quick Stat Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Total Booked</div>
+            <div class="fs-3 fw-bold"><%= stats.totalParcels %></div>
+          </div>
+          <div class="text-primary fs-2"><i class="bi bi-box-seam"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card stat-info p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">In Transit / Active</div>
+            <div class="fs-3 fw-bold text-info"><%= stats.inTransit %></div>
+          </div>
+          <div class="text-info fs-2"><i class="bi bi-truck"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card stat-success p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Delivered</div>
+            <div class="fs-3 fw-bold text-success"><%= stats.delivered %></div>
+          </div>
+          <div class="text-success fs-2"><i class="bi bi-check2-circle"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="card stat-card stat-danger p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-semibold">Failed Attempts</div>
+            <div class="fs-3 fw-bold text-danger"><%= stats.failed %></div>
+          </div>
+          <div class="text-danger fs-2"><i class="bi bi-exclamation-triangle"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Parcels Table -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Parcels</h5>
+      <a href="/customer/parcels" class="btn btn-sm btn-outline-primary">View Full History</a>
+    </div>
+    <div class="card-body p-0">
+      <% if (parcels && parcels.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Tracking ID</th>
+                <th>Receiver</th>
+                <th>Destination</th>
+                <th>Status</th>
+                <th>Booked On</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% parcels.forEach(p => { %>
+                <tr>
+                  <td>
+                    <span class="fw-bold text-primary"><%= p.trackingId %></span>
+                    <button class="btn btn-sm btn-link p-0 text-muted ms-1 btn-copy-tracking" data-tracking-id="<%= p.trackingId %>" title="Copy">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </td>
+                  <td>
+                    <div class="fw-semibold"><%= p.receiverName %></div>
+                    <div class="text-muted small"><i class="bi bi-telephone me-1"></i><%= p.receiverPhone %></div>
+                  </td>
+                  <td class="small">
+                    <div><%= p.receiverAddress %></div>
+                    <span class="badge bg-light text-dark border">PIN: <%= p.receiverPincode %></span>
+                  </td>
+                  <td>
+                    <%- include('../partials/statusBadge', { status: p.currentStatus }) %>
+                  </td>
+                  <td class="small text-muted">
+                    <%= new Date(p.bookedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="/track?trackingId=<%= p.trackingId %>" class="btn btn-sm btn-primary" title="Track Live">
+                        <i class="bi bi-search"></i> Track
+                      </a>
+                      <% if (p.currentStatus === 'Booked') { %>
+                        <form action="/customer/cancel/<%= p._id %>" method="POST" onsubmit="return confirm('Are you sure you want to cancel this parcel?');">
+                          <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancel Booking">
+                            <i class="bi bi-x-circle"></i> Cancel
+                          </button>
+                        </form>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-box2 fs-1 d-block mb-2 text-secondary"></i>
+          <h5>No parcels booked yet</h5>
+          <p class="small mb-3">You haven't booked any shipments yet. Get started now!</p>
+          <a href="/customer/book" class="btn btn-primary btn-sm">Book Your First Parcel</a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,106 @@
+<div class="container my-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Assigned Parcels</h2>
+      <p class="text-muted mb-0">Manage and update progress for parcels assigned to your delivery queue.</p>
+    </div>
+  </div>
+
+  <!-- Filters & Search Toolbar -->
+  <div class="card mb-4 p-3 shadow-sm">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-7">
+        <div class="d-flex flex-wrap gap-1">
+          <a href="/agent/parcels?status=all" class="btn btn-sm <%= currentFilter === 'all' ? 'btn-primary' : 'btn-outline-secondary' %>">All</a>
+          <a href="/agent/parcels?status=Booked" class="btn btn-sm <%= currentFilter === 'Booked' ? 'btn-secondary text-white' : 'btn-outline-secondary' %>">Booked</a>
+          <a href="/agent/parcels?status=Picked Up" class="btn btn-sm <%= currentFilter === 'Picked Up' ? 'btn-info text-dark' : 'btn-outline-secondary' %>">Picked Up</a>
+          <a href="/agent/parcels?status=In Transit" class="btn btn-sm <%= currentFilter === 'In Transit' ? 'btn-primary text-white' : 'btn-outline-secondary' %>">In Transit</a>
+          <a href="/agent/parcels?status=Out for Delivery" class="btn btn-sm <%= currentFilter === 'Out for Delivery' ? 'btn-warning text-dark' : 'btn-outline-secondary' %>">Out for Delivery</a>
+          <a href="/agent/parcels?status=Delivered" class="btn btn-sm <%= currentFilter === 'Delivered' ? 'btn-success text-white' : 'btn-outline-secondary' %>">Delivered</a>
+          <a href="/agent/parcels?status=Failed" class="btn btn-sm <%= currentFilter === 'Failed' ? 'btn-danger text-white' : 'btn-outline-secondary' %>">Failed</a>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <form action="/agent/parcels" method="GET" class="d-flex gap-2">
+          <input type="hidden" name="status" value="<%= currentFilter %>">
+          <input 
+            type="text" 
+            name="search" 
+            class="form-control form-control-sm" 
+            placeholder="Search tracking ID, recipient, address..." 
+            value="<%= searchQuery %>"
+          >
+          <button type="submit" class="btn btn-sm btn-primary">Search</button>
+          <% if (searchQuery) { %>
+            <a href="/agent/parcels?status=<%= currentFilter %>" class="btn btn-sm btn-outline-secondary">Clear</a>
+          <% } %>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parcels Table -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <% if (parcels && parcels.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Tracking ID</th>
+                <th>Recipient (Drop)</th>
+                <th>Sender (Pickup)</th>
+                <th>Specs</th>
+                <th>Status</th>
+                <th>Booked At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% parcels.forEach(p => { %>
+                <tr>
+                  <td>
+                    <div class="fw-bold text-primary"><%= p.trackingId %></div>
+                  </td>
+                  <td>
+                    <div class="fw-semibold"><%= p.receiverName %></div>
+                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i><%= p.receiverPhone %></div>
+                    <div class="small text-truncate" style="max-width: 220px;" title="<%= p.receiverAddress %>">
+                      <%= p.receiverAddress %> (PIN: <%= p.receiverPincode %>)
+                    </div>
+                  </td>
+                  <td class="small">
+                    <div><%= p.senderName %></div>
+                    <div class="text-muted"><%= p.senderPhone %></div>
+                    <div class="text-truncate" style="max-width: 180px;" title="<%= p.senderAddress %>"><%= p.senderAddress %></div>
+                  </td>
+                  <td class="small">
+                    <div><%= p.weight %> kg</div>
+                    <div class="text-muted"><%= p.parcelType %></div>
+                  </td>
+                  <td>
+                    <%- include('../partials/statusBadge', { status: p.currentStatus }) %>
+                  </td>
+                  <td class="small text-muted text-nowrap">
+                    <%= new Date(p.bookedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %>
+                  </td>
+                  <td>
+                    <a href="/agent/parcel/<%= p._id %>" class="btn btn-sm btn-outline-primary fw-semibold text-nowrap">
+                      <i class="bi bi-pencil-square me-1"></i> Update Status
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+          <h5>No parcels found</h5>
+          <p class="small">There are no parcels matching the chosen filter.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

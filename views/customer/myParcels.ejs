@@ -1,0 +1,122 @@
+<div class="container my-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">My Booked Parcels</h2>
+      <p class="text-muted mb-0">View tracking status, history, and manage all your parcel bookings.</p>
+    </div>
+    <a href="/customer/book" class="btn btn-primary fw-semibold">
+      <i class="bi bi-plus-circle me-1"></i> Book Another Parcel
+    </a>
+  </div>
+
+  <!-- Filters & Search Toolbar -->
+  <div class="card mb-4 p-3 shadow-sm">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-7">
+        <!-- Status Tabs / Pills -->
+        <div class="d-flex flex-wrap gap-1">
+          <a href="/customer/parcels?status=all" class="btn btn-sm <%= currentFilter === 'all' ? 'btn-primary' : 'btn-outline-secondary' %>">All</a>
+          <a href="/customer/parcels?status=Booked" class="btn btn-sm <%= currentFilter === 'Booked' ? 'btn-secondary text-white' : 'btn-outline-secondary' %>">Booked</a>
+          <a href="/customer/parcels?status=In Transit" class="btn btn-sm <%= currentFilter === 'In Transit' ? 'btn-primary text-white' : 'btn-outline-secondary' %>">In Transit</a>
+          <a href="/customer/parcels?status=Delivered" class="btn btn-sm <%= currentFilter === 'Delivered' ? 'btn-success text-white' : 'btn-outline-secondary' %>">Delivered</a>
+          <a href="/customer/parcels?status=Failed" class="btn btn-sm <%= currentFilter === 'Failed' ? 'btn-danger text-white' : 'btn-outline-secondary' %>">Failed</a>
+          <a href="/customer/parcels?status=Cancelled" class="btn btn-sm <%= currentFilter === 'Cancelled' ? 'btn-dark text-white' : 'btn-outline-secondary' %>">Cancelled</a>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <form action="/customer/parcels" method="GET" class="d-flex gap-2">
+          <input type="hidden" name="status" value="<%= currentFilter %>">
+          <input 
+            type="text" 
+            name="search" 
+            class="form-control form-control-sm" 
+            placeholder="Search by Tracking ID, name, pin..." 
+            value="<%= searchQuery %>"
+          >
+          <button type="submit" class="btn btn-sm btn-primary">Search</button>
+          <% if (searchQuery) { %>
+            <a href="/customer/parcels?status=<%= currentFilter %>" class="btn btn-sm btn-outline-secondary">Clear</a>
+          <% } %>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parcels Table -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <% if (parcels && parcels.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Tracking ID</th>
+                <th>Recipient</th>
+                <th>Destination</th>
+                <th>Specs</th>
+                <th>Charge</th>
+                <th>Status</th>
+                <th>Booked Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% parcels.forEach(p => { %>
+                <tr>
+                  <td>
+                    <div class="fw-bold text-primary"><%= p.trackingId %></div>
+                    <button class="btn btn-sm btn-link p-0 text-muted btn-copy-tracking small" data-tracking-id="<%= p.trackingId %>">
+                      <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                  </td>
+                  <td>
+                    <div class="fw-semibold"><%= p.receiverName %></div>
+                    <div class="small text-muted"><%= p.receiverPhone %></div>
+                  </td>
+                  <td class="small" style="max-width: 200px;">
+                    <div class="text-truncate" title="<%= p.receiverAddress %>"><%= p.receiverAddress %></div>
+                    <span class="badge bg-light text-dark border">PIN: <%= p.receiverPincode %></span>
+                  </td>
+                  <td class="small">
+                    <div><%= p.parcelType %></div>
+                    <div class="text-muted"><%= p.weight %> kg</div>
+                  </td>
+                  <td class="fw-semibold text-success small">
+                    ₹<%= p.deliveryCharge %>
+                  </td>
+                  <td>
+                    <%- include('../partials/statusBadge', { status: p.currentStatus }) %>
+                  </td>
+                  <td class="small text-muted text-nowrap">
+                    <%= new Date(p.bookedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="/track?trackingId=<%= p.trackingId %>" class="btn btn-sm btn-primary" title="Track Live">
+                        <i class="bi bi-search"></i>
+                      </a>
+                      <% if (p.currentStatus === 'Booked') { %>
+                        <form action="/customer/cancel/<%= p._id %>" method="POST" onsubmit="return confirm('Are you sure you want to cancel parcel <%= p.trackingId %>?');">
+                          <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancel Booking">
+                            <i class="bi bi-x-circle"></i>
+                          </button>
+                        </form>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+          <h5>No parcels match your criteria</h5>
+          <p class="small mb-3">Try adjusting your filters or search keywords.</p>
+          <a href="/customer/parcels" class="btn btn-outline-primary btn-sm">Reset Filters</a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

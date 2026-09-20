@@ -1,0 +1,176 @@
+<div class="container my-4">
+  <div class="d-flex align-items-center mb-4">
+    <a href="/agent/parcels" class="btn btn-outline-secondary btn-sm me-3">
+      <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+    <div>
+      <h2 class="fw-bold mb-0">Parcel Details & Status Update</h2>
+      <span class="text-muted small">Tracking ID: <strong><%= parcel.trackingId %></strong></span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Status Update Card & History Log -->
+    <div class="col-lg-7">
+      <!-- Status Transition Action Card -->
+      <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+          <h5 class="fw-bold mb-0"><i class="bi bi-arrow-repeat me-2"></i>Update Parcel Lifecycle Status</h5>
+          <span class="badge bg-white text-primary fw-bold">Current: <%= parcel.currentStatus %></span>
+        </div>
+        <div class="card-body p-4">
+          <% if (nextAllowedStatuses && nextAllowedStatuses.length > 0) { %>
+            <form action="/agent/parcel/<%= parcel._id %>/update" method="POST">
+              <div class="mb-3">
+                <label for="status" class="form-label fw-semibold">Next Allowed Status <span class="text-danger">*</span></label>
+                <select name="status" id="status" class="form-select form-select-lg" required>
+                  <% nextAllowedStatuses.forEach(s => { %>
+                    <option value="<%= s %>"><%= s %></option>
+                  <% }) %>
+                </select>
+                <div class="form-text text-muted small">
+                  Strict lifecycle sequence enforced: Booked → Picked Up → In Transit → Out for Delivery → Delivered / Failed.
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="remarks" class="form-label fw-semibold">Agent Remarks / Notes</label>
+                <textarea 
+                  name="remarks" 
+                  id="remarks" 
+                  class="form-control" 
+                  rows="3" 
+                  placeholder="e.g. Collected from pickup location; Out for delivery on bike; Customer not reachable, will re-attempt."
+                ></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">
+                <i class="bi bi-check2-circle me-1"></i> Confirm Status Update
+              </button>
+            </form>
+          <% } else { %>
+            <div class="alert alert-secondary mb-0 text-center py-4">
+              <i class="bi bi-check-circle-fill text-success fs-2 d-block mb-2"></i>
+              <h5 class="fw-bold mb-1">Parcel Terminal State</h5>
+              <p class="text-muted small mb-0">
+                This parcel is currently in <strong><%= parcel.currentStatus %></strong> status and has completed its delivery journey.
+              </p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- History Audit Log -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Status History Trail</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Timestamp</th>
+                  <th>Updated By</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% 
+                  const reversedHistory = [...parcel.statusHistory].reverse();
+                  reversedHistory.forEach(log => { 
+                %>
+                  <tr>
+                    <td>
+                      <%- include('../partials/statusBadge', { status: log.status }) %>
+                    </td>
+                    <td class="small text-nowrap">
+                      <%= new Date(log.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %>
+                      <br>
+                      <span class="text-muted"><%= new Date(log.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %></span>
+                    </td>
+                    <td class="small">
+                      <%= log.updatedBy ? log.updatedBy.name : 'System' %>
+                    </td>
+                    <td class="small text-muted">
+                      <%= log.remarks || '-' %>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Shipment Details -->
+    <div class="col-lg-5">
+      <!-- Destination (Receiver) Card -->
+      <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+          <h6 class="fw-bold mb-0 text-success"><i class="bi bi-geo-fill me-2"></i>Delivery Destination</h6>
+        </div>
+        <div class="card-body">
+          <h5 class="fw-bold mb-1"><%= parcel.receiverName %></h5>
+          <p class="text-muted mb-2"><%= parcel.receiverAddress %></p>
+          <div class="mb-2"><span class="badge bg-secondary">PIN: <%= parcel.receiverPincode %></span></div>
+          <div class="p-2 bg-light rounded d-flex align-items-center">
+            <i class="bi bi-telephone-fill text-success me-2 fs-5"></i>
+            <a href="tel:<%= parcel.receiverPhone %>" class="text-dark fw-bold text-decoration-none"><%= parcel.receiverPhone %></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pickup (Sender) Card -->
+      <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+          <h6 class="fw-bold mb-0 text-danger"><i class="bi bi-geo-alt me-2"></i>Pickup Origin</h6>
+        </div>
+        <div class="card-body">
+          <h5 class="fw-bold mb-1"><%= parcel.senderName %></h5>
+          <p class="text-muted mb-2"><%= parcel.senderAddress %></p>
+          <div class="mb-2"><span class="badge bg-secondary">PIN: <%= parcel.senderPincode %></span></div>
+          <div class="p-2 bg-light rounded d-flex align-items-center">
+            <i class="bi bi-telephone text-muted me-2"></i>
+            <span><%= parcel.senderPhone %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parcel Properties -->
+      <div class="card">
+        <div class="card-header bg-white py-3">
+          <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2"></i>Shipment Info</h6>
+        </div>
+        <div class="card-body small">
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span class="text-muted">Weight:</span>
+            <span class="fw-bold"><%= parcel.weight %> kg</span>
+          </div>
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span class="text-muted">Type:</span>
+            <span class="fw-bold"><%= parcel.parcelType %></span>
+          </div>
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span class="text-muted">Booking Date:</span>
+            <span><%= new Date(parcel.bookedAt).toLocaleString() %></span>
+          </div>
+          <% if (parcel.deliveredAt) { %>
+            <div class="d-flex justify-content-between py-1 border-bottom">
+              <span class="text-muted">Delivered Date:</span>
+              <span class="text-success fw-bold"><%= new Date(parcel.deliveredAt).toLocaleString() %></span>
+            </div>
+          <% } %>
+          <% if (parcel.description) { %>
+            <div class="mt-2">
+              <span class="text-muted">Notes:</span>
+              <div class="p-2 bg-light rounded mt-1"><%= parcel.description %></div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

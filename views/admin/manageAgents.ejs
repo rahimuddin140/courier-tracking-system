@@ -1,0 +1,88 @@
+<div class="container my-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Delivery Agent Fleet</h2>
+      <p class="text-muted mb-0">Create, assign regional operational zones, and monitor field agent accounts.</p>
+    </div>
+    <a href="/admin/agents/create" class="btn btn-primary fw-semibold">
+      <i class="bi bi-person-plus me-1"></i> Add New Agent
+    </a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <% if (agents && agents.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Agent Name</th>
+                <th>Contact Info</th>
+                <th>Assigned Zone</th>
+                <th>Account Status</th>
+                <th>Joined Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% agents.forEach(ag => { %>
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 38px; height: 38px;">
+                        <%= ag.name.charAt(0).toUpperCase() %>
+                      </div>
+                      <div>
+                        <div class="fw-bold"><%= ag.name %></div>
+                        <div class="small text-muted">ID: <%= ag._id %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="small">
+                    <div><i class="bi bi-envelope me-1 text-muted"></i><%= ag.email %></div>
+                    <div><i class="bi bi-telephone me-1 text-muted"></i><%= ag.phone %></div>
+                  </td>
+                  <td>
+                    <% if (ag.zone) { %>
+                      <span class="badge bg-light text-dark border">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i><%= ag.zone.zoneName %>
+                      </span>
+                    <% } else { %>
+                      <span class="badge bg-secondary">Unassigned Zone</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (ag.isActive) { %>
+                      <span class="badge bg-success-subtle text-success border border-success-subtle">
+                        <i class="bi bi-check-circle me-1"></i> Active
+                      </span>
+                    <% } else { %>
+                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                        <i class="bi bi-x-circle me-1"></i> Inactive
+                      </span>
+                    <% } %>
+                  </td>
+                  <td class="small text-muted text-nowrap">
+                    <%= new Date(ag.createdAt).toLocaleDateString() %>
+                  </td>
+                  <td>
+                    <a href="/admin/agents/edit/<%= ag._id %>" class="btn btn-sm btn-outline-primary" title="Edit Agent">
+                      <i class="bi bi-pencil"></i> Edit
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+          <h5>No delivery agents registered</h5>
+          <p class="small mb-3">Add agents to begin assigning delivery orders.</p>
+          <a href="/admin/agents/create" class="btn btn-primary btn-sm">Create First Agent</a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

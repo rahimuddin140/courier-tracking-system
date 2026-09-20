@@ -1,0 +1,65 @@
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="d-flex align-items-center mb-4">
+        <a href="/admin/agents" class="btn btn-outline-secondary btn-sm me-3">
+          <i class="bi bi-arrow-left"></i> Back to Agents
+        </a>
+        <div>
+          <h2 class="fw-bold mb-0">Edit Agent: <%= agent.name %></h2>
+          <span class="text-muted small">Update profile, zone assignment, or toggle active status</span>
+        </div>
+      </div>
+
+      <div class="card p-4 p-md-5 shadow-sm">
+        <form action="/admin/agents/edit/<%= agent._id %>" method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Email Address (Login Username)</label>
+            <input type="email" class="form-control bg-light" value="<%= agent.email %>" readonly>
+            <div class="form-text small">Email address cannot be changed once created.</div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+              <input type="text" name="name" class="form-control" value="<%= agent.name %>" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+              <input type="text" name="phone" class="form-control" value="<%= agent.phone %>" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Change Password</label>
+            <input type="password" name="password" class="form-control" minlength="6" placeholder="Leave empty to keep existing password">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Operational Zone</label>
+            <select name="zoneId" class="form-select">
+              <option value="">-- No specific zone (Floater) --</option>
+              <% zones.forEach(z => { %>
+                <option value="<%= z._id %>" <%= agent.zone && agent.zone.toString() === z._id.toString() ? 'selected' : '' %>>
+                  <%= z.zoneName %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold d-block">Account Status</label>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="isActive" id="isActive" <%= agent.isActive ? 'checked' : '' %>>
+              <label class="form-check-label" for="isActive">Agent is Active and can receive parcel assignments</label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+            <i class="bi bi-save me-1"></i> Save Changes
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
